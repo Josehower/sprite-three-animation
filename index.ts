@@ -1,5 +1,21 @@
-import * as THREE from 'three';
-import { GameSpriteAnimation } from './types';
+type TiledAnimationStep = {
+  duration: number;
+  tileid: number;
+};
+
+type GameAnimationStep = Omit<TiledAnimationStep, 'tileid'> & {
+  port?: {
+    x?: number;
+    y?: number;
+  };
+  move?: {
+    x?: number;
+    y?: number;
+  };
+  tileid?: number;
+};
+
+export type GameSpriteAnimation = GameAnimationStep[];
 
 export function tiledToR3FTextureTranspiler(
   tileValue: number,
@@ -41,7 +57,7 @@ export function createTileTextureAnimator(
   tileSize: number | [number, number],
   startValue: number = 0,
 ) {
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
   const tileSizeVector = Array.isArray(tileSize)
     ? tileSize
