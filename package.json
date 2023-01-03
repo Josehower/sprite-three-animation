@@ -6,7 +6,6 @@
   "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "prepublish": "yarn install",
     "build": "rm -rf dist/ && esbuild index.ts --bundle --outfile=dist/index.js --platform=node --target=node16.8 --format=esm --banner:js=\"import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url); import { dirname } from 'node:path'; import { fileURLToPath } from 'node:url'; const __filename = fileURLToPath(import.meta.url); const __dirname = dirname(__filename); \" && cp -R index.d.ts dist/index.d.ts"
   },
   "devDependencies": {
