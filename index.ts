@@ -57,6 +57,7 @@ export function createTileTextureAnimator(
   tileSize: number | [number, number],
   startValue: number = 0,
 ) {
+  // This seems to be unnecessary but probably need a bit more of research
   // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
   const tileSizeVector = Array.isArray(tileSize)
