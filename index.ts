@@ -19,6 +19,35 @@ type GameAnimationStep = Omit<TiledAnimationStep, 'tileid'> & {
 
 export type GameSpriteAnimation = GameAnimationStep[];
 
+export type GameAnimation = number[] | GameSpriteAnimation;
+
+export type AnimationOptions<T extends GameAnimation> = {
+  /** Tile size in pixels `[<size for x>,<size for y>]`, single number is shorthand for square tiles.
+   *
+   *  if undefined defaults to `tileSize: "32"`
+   */
+  tileSize?: number | [number, number];
+  /** if undefined defaults to `frameDuration: "100"`
+   *
+   *    💥 Use this option only with `number[]` animations
+   */
+  frameDuration?: T extends number[] ? number : never;
+  /** Sprite position update on every frame, accept negative numbers too.
+   *
+   *  if undefined defaults to `{ x: 0, y: 0 }`
+   */
+  constantMove?: { x?: number; y?: number };
+  /** if undefined defaults to `type: "loop"`*/
+  type?: 'single onPress' | 'single' | 'loop';
+  /** Set the animation to call the first animation step immediately instead of wait the first time duration, if `true` the first step duration will be ignored.
+   *
+   *  if undefined defaults to `quickStart: "false"`
+   *
+   *    💥 Not compatible with `number[]` animations, if this feature is needed use a complex animation array.
+   */
+  quickStart?: T extends GameSpriteAnimation ? boolean : never;
+};
+
 export function tiledToR3FTextureTranspiler(
   tileValue: number,
   imageWidth: number,
@@ -95,24 +124,27 @@ export function createTileTextureAnimator(
   };
 }
 
-export function createAnimationFromSpriteRef(
+export function createAnimation(
   spriteRef: MutableRefObject<THREE.Sprite>,
+  animation: GameAnimation,
+  options?: AnimationOptions<GameAnimation>,
 ) {
-  let animation: (delta: number, control?: boolean) => void;
+  let animationFunction: (delta: number, control?: boolean) => void;
 
   const closure = spriteRef;
 
   return (delta: number, control?: boolean) => {
     if (!closure.current) return;
 
-    if (!animation) {
-      animation = createSpriteAnimation(closure.current, [10, 11, 12, 13], {
-        tileSize: [64, 64],
-        constantMove: { x: 0.005 },
-      });
+    if (!animationFunction) {
+      animationFunction = createSpriteAnimation(
+        closure.current,
+        animation,
+        options,
+      );
     }
 
-    animation(delta, control);
+    animationFunction(delta, control);
   };
 }
 
@@ -127,33 +159,8 @@ export function createSpriteAnimation<
   Animation extends GameSpriteAnimation | number[],
 >(
   spriteRef: THREE.Sprite,
-  animation: Animation,
-  options?: {
-    /** Tile size in pixels `[<size for x>,<size for y>]`, single number is shorthand for square tiles.
-     *
-     *  if undefined defaults to `tileSize: "32"`
-     */
-    tileSize?: number | [number, number];
-    /** if undefined defaults to `frameDuration: "100"`
-     *
-     *    💥 Use this option only with `number[]` animations
-     */
-    frameDuration?: Animation extends number[] ? number : never;
-    /** Sprite position update on every frame, accept negative numbers too.
-     *
-     *  if undefined defaults to `{ x: 0, y: 0 }`
-     */
-    constantMove?: { x?: number; y?: number };
-    /** if undefined defaults to `type: "loop"`*/
-    type?: 'single onPress' | 'single' | 'loop';
-    /** Set the animation to call the first animation step immediately instead of wait the first time duration, if `true` the first step duration will be ignored.
-     *
-     *  if undefined defaults to `quickStart: "false"`
-     *
-     *    💥 Not compatible with `number[]` animations, if this feature is needed use a complex animation array.
-     */
-    quickStart?: Animation extends GameSpriteAnimation ? boolean : never;
-  },
+  animation: GameAnimation,
+  options?: AnimationOptions<GameAnimation>,
 ) {
   const tileSizeDefault = 32;
   const frameDurationDefault = 100;
