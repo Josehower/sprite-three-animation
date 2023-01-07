@@ -143,7 +143,13 @@ type AnimationOptions<T extends number[] | GameSpriteAnimation> = {
     x?: number;
     y?: number;
   };
-  /** if undefined defaults to `type: "loop"`*/
+  /** Type of animation modifying how the function interacts with control,
+   *
+   * if undefined defaults to `type: "loop"`
+   *
+   *    💥 Not compatible with `number[]` animations,
+   *    for "single" and "single onPress" use a complex animation array.
+   */
   type?: 'single onPress' | 'single' | 'loop';
   /** Set the animation to call the first animation step immediately instead of wait the first time duration, if `true` the first step duration will be ignored.
    *
