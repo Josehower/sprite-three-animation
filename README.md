@@ -65,11 +65,11 @@ function Box(props) {
 
 - tileSize?: `number | [number number]`
 
-Size in pixels of a tile in the Sprite Sheet
+  Size in pixels of a tile in the Sprite Sheet
 
-Tile size in pixels `[<size for x>,<size for y>]`, single number is shorthand for square tiles.
+  Tile size in pixels `[<size for x>,<size for y>]`, single number is shorthand for square tiles.
 
-If undefined defaults to `tileSize: "32"`
+  If undefined defaults to `tileSize: "32"`
 
 - frameDuration?: `number`
 
