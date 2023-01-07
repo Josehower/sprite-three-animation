@@ -19,9 +19,7 @@ type GameAnimationStep = Omit<TiledAnimationStep, 'tileid'> & {
 
 export type GameSpriteAnimation = GameAnimationStep[];
 
-export type GameAnimation = number[] | GameSpriteAnimation;
-
-export type AnimationOptions<T extends GameAnimation> = {
+export type AnimationOptions<T extends number[] | GameSpriteAnimation> = {
   /** Tile size in pixels `[<size for x>,<size for y>]`, single number is shorthand for square tiles.
    *
    *  if undefined defaults to `tileSize: "32"`
@@ -124,10 +122,19 @@ export function createTileTextureAnimator(
   };
 }
 
-export function createAnimation(
+/**
+ Create a function that animate target sprite from an array of tileid numbers, or a complex GameSpriteAnimation.
+
+ Function is also compatible with `Tiled` animations format.
+
+ The Function must be called inside of `useFrame` or `raf` since depends of a delta value to count.
+ */
+export function createAnimation<
+  AnimationType extends GameSpriteAnimation | number[],
+>(
   spriteRef: MutableRefObject<THREE.Sprite>,
-  animation: GameAnimation,
-  options?: AnimationOptions<GameAnimation>,
+  animation: AnimationType,
+  options?: AnimationOptions<AnimationType>,
 ) {
   let animationFunction: (delta: number, control?: boolean) => void;
 
@@ -156,11 +163,11 @@ export function createAnimation(
  The Function must be called inside of `useFrame` or `raf` since depends of a delta value to count.
  */
 export function createSpriteAnimation<
-  Animation extends GameSpriteAnimation | number[],
+  AnimationType extends GameSpriteAnimation | number[],
 >(
   spriteRef: THREE.Sprite,
-  animation: GameAnimation,
-  options?: AnimationOptions<GameAnimation>,
+  animation: AnimationType,
+  options?: AnimationOptions<AnimationType>,
 ) {
   const tileSizeDefault = 32;
   const frameDurationDefault = 100;
