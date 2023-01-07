@@ -29,13 +29,22 @@ yarn add sprite-three-animation
 }[]
 ```
 
-4. call the animation function inside of `useFrame` from R3Fiber passing the delta to the animation 5. enjoy!
+4. call the animation function inside of `useFrame` from R3Fiber passing the delta to the animation
+
+5. enjoy!
 
 ```jsx
+import { createAnimation } from 'sprite-three-animation';
+import { useFrame, useLoader } from '@react-three/fiber';
+import { useRef } from 'react';
+
 function Box(props) {
+  // Load the spriteSheet texture
   const texture = useLoader(THREE.TextureLoader, '/skullMonkey.png');
+  // Get the ref of the Sprite
   const sprite = useRef();
 
+  // Create your animation passing the array of frames
   const animation = createAnimation(sprite, [10, 12, 13, 14, 15, 16, 17], {
     tileSize: 64,
   });
@@ -48,7 +57,7 @@ function Box(props) {
      const control: boolean = isUpKeyPressed() 
      animation(delta, control)
     */
-    animation(delta);
+    animation(delta); // Call the animation function inside of useFrame from R3Fiber
   });
 
   return (
