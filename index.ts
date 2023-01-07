@@ -1,3 +1,5 @@
+import { MutableRefObject } from 'react';
+
 type TiledAnimationStep = {
   duration: number;
   tileid: number;
@@ -93,6 +95,27 @@ export function createTileTextureAnimator(
   };
 }
 
+export function createAnimationFromSpriteRef(
+  spriteRef: MutableRefObject<THREE.Sprite>,
+) {
+  let animation: (delta: number, control?: boolean) => void;
+
+  const closure = spriteRef;
+
+  return (delta: number, control?: boolean) => {
+    if (!closure.current) return;
+
+    if (!animation) {
+      animation = createSpriteAnimation(closure.current, [10, 11, 12, 13], {
+        tileSize: [64, 64],
+        constantMove: { x: 0.005 },
+      });
+    }
+
+    animation(delta, control);
+  };
+}
+
 /**
  Create a function that animate target sprite from an array of tileid numbers, or a complex GameSpriteAnimation.
 
@@ -103,7 +126,7 @@ export function createTileTextureAnimator(
 export function createSpriteAnimation<
   Animation extends GameSpriteAnimation | number[],
 >(
-  sprite: THREE.Sprite,
+  spriteRef: THREE.Sprite,
   animation: Animation,
   options?: {
     /** Tile size in pixels `[<size for x>,<size for y>]`, single number is shorthand for square tiles.
@@ -151,12 +174,12 @@ export function createSpriteAnimation<
     throw new Error('Animation is empty');
   }
 
-  if (!sprite.material.map) {
+  if (!spriteRef.material.map) {
     throw new Error('Sprite must contain a texture to animate');
   }
 
   const animator = createTileTextureAnimator(
-    sprite.material.map,
+    spriteRef.material.map,
     (options && options.tileSize) || tileSizeDefault,
   );
 
@@ -173,8 +196,8 @@ export function createSpriteAnimation<
       const { x, y } = complexAnimation[currentAnimationStepIndex].port || {};
 
       // update the position one time by step of the sprite, causing a teleport effect
-      sprite.position.x += x || 0;
-      sprite.position.y += y || 0;
+      spriteRef.position.x += x || 0;
+      spriteRef.position.y += y || 0;
     }
     if (typeof tileid !== 'undefined') {
       animator(tileid);
@@ -206,13 +229,13 @@ export function createSpriteAnimation<
         if (isComplexAnimation && complexAnimation[index].move) {
           const { x, y } = complexAnimation[index].move || {};
 
-          sprite.position.x += x || 0;
-          sprite.position.y += y || 0;
+          spriteRef.position.x += x || 0;
+          spriteRef.position.y += y || 0;
         }
 
-        sprite.position.x +=
+        spriteRef.position.x +=
           (options && options.constantMove?.x) || moveXDefault;
-        sprite.position.y +=
+        spriteRef.position.y +=
           (options && options.constantMove?.y) || moveYDefault;
       },
       onRoundEnd: () => {
