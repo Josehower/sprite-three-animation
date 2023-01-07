@@ -1,11 +1,6 @@
 import { MutableRefObject } from 'react';
 
-type TiledAnimationStep = {
-  duration: number;
-  tileid: number;
-};
-
-type GameAnimationStep = Omit<TiledAnimationStep, 'tileid'> & {
+type GameAnimationStep = {
   port?: {
     x?: number;
     y?: number;
@@ -15,6 +10,7 @@ type GameAnimationStep = Omit<TiledAnimationStep, 'tileid'> & {
     y?: number;
   };
   tileid?: number;
+  duration: number;
 };
 
 export type GameSpriteAnimation = GameAnimationStep[];
@@ -35,13 +31,20 @@ export type AnimationOptions<T extends number[] | GameSpriteAnimation> = {
    *  if undefined defaults to `{ x: 0, y: 0 }`
    */
   constantMove?: { x?: number; y?: number };
-  /** if undefined defaults to `type: "loop"`*/
-  type?: 'single onPress' | 'single' | 'loop';
+  /** Type of animation modifying how the function interacts with control,
+   *
+   * if undefined defaults to `type: "loop"`
+   *
+   *    💥 Not compatible with `number[]` animations,
+   *    for "single" and "single onPress" use a complex animation array.
+   */
+  type?: T extends number[] ? 'loop' : 'single onPress' | 'single' | 'loop';
   /** Set the animation to call the first animation step immediately instead of wait the first time duration, if `true` the first step duration will be ignored.
    *
    *  if undefined defaults to `quickStart: "false"`
    *
-   *    💥 Not compatible with `number[]` animations, if this feature is needed use a complex animation array.
+   *    💥 Not compatible with `number[]` animations,
+   *    if this feature is needed use a complex animation array.
    */
   quickStart?: T extends GameSpriteAnimation ? boolean : never;
 };
@@ -86,9 +89,6 @@ export function createTileTextureAnimator(
   tileSize: number | [number, number],
   startValue: number = 0,
 ) {
-  // This seems to be unnecessary but probably need a bit more of research
-  // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
   const tileSizeVector = Array.isArray(tileSize)
     ? tileSize
     : [tileSize, tileSize];
@@ -136,7 +136,7 @@ export function createAnimation<
   animation: AnimationType,
   options?: AnimationOptions<AnimationType>,
 ) {
-  let animationFunction: (delta: number, control?: boolean) => void;
+  let animationFunction: (delta: number, control?: boolean) => boolean;
 
   const closure = spriteRef;
 
@@ -151,7 +151,7 @@ export function createAnimation<
       );
     }
 
-    animationFunction(delta, control);
+    return animationFunction(delta, control);
   };
 }
 
